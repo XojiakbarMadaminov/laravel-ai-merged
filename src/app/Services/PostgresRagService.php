@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 
-class RagService
+class PostgresRagService
 {
     public function __construct(private AiService $ai) {}
 

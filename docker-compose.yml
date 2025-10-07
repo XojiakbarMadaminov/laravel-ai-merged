@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   # PHP-FPM + Supervisor + Cron
   php-app:
@@ -14,24 +16,25 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      # Laravel kodingiz hostdan ko‘rinsin:
       - ./src/:/var/www/html/src
-      # PHP-FPM loglari:
       - ./docker/logs/php-fpm:/var/log/php-fpm
     networks:
       - app-network
     depends_on:
-      - laravel-ai-db
-      - ollama
+      - laravel-ai-new-db
+      - ollama-new
+      - qdrant
     environment:
-      OLLAMA_URL: "http://ollama:11434"
+      OLLAMA_URL: "http://ollama-new:11434"
       DEFAULT_MODEL: "gpt-oss:20b"
       EMBED_MODEL: "nomic-embed-text"
+      QDRANT_HOST: "http://qdrant:6333"
+      QDRANT_COLLECTION: "documents"
 
   # Postgres + pgvector (RAG uchun shart)
-  laravel-ai-db:
+  laravel-ai-new-db:
     image: pgvector/pgvector:pg17
-    container_name: laravel-ai-db
+    container_name: laravel-ai-new-db
     restart: unless-stopped
     tty: true
     ports:
@@ -79,9 +82,9 @@ services:
       - app-network
 
   # Ollama (LLM + Embeddings)
-  ollama:
+  ollama-new:
     image: ollama/ollama:latest
-    container_name: laravel-ai-ollama
+    container_name: laravel-ai-new-ollama
     restart: unless-stopped
     volumes:
       - ollama_models:/root/.ollama
@@ -93,11 +96,26 @@ services:
       timeout: 5s
       retries: 20
 
+  # 🧠 Qdrant (Vector Database)
+  qdrant:
+    image: qdrant/qdrant
+    container_name: laravel-ai-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"   # REST API
+      - "6334:6334"   # gRPC (ixtiyoriy)
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    networks:
+      - app-network
+
 # Volumes
 volumes:
   migrant-pgdata:
     driver: local
   ollama_models:
+    driver: local
+  qdrant_storage:
     driver: local
 
 # Networks

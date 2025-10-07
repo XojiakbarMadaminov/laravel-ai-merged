@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\PostgresRagService;
+use App\Services\QdrantRagService;
 use Illuminate\Http\Request;
-use App\Services\RagService;
 
 class IngestController extends Controller
 {
-    public function __construct(private RagService $rag) {}
+    public function __construct(private QdrantRagService $rag)
+    {
+    }
 
     public function store(Request $request)
     {
@@ -21,6 +24,7 @@ class IngestController extends Controller
         $meta = $data['meta'] ?? [];
 
         $chunks = $this->rag->ingestText($data['text'], $project, $meta);
+
 
         return response()->json([
             'ok' => true,

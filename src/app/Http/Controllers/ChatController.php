@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Services\RagService;
 use App\Services\AiService;
+use App\Services\PostgresRagService;
+use App\Services\QdrantRagService;
+use Illuminate\Http\Request;
 
 class ChatController extends Controller
 {
-    public function __construct(private RagService $rag, private AiService $ai) {}
+    public function __construct(private QdrantRagService $rag, private AiService $ai)
+    {
+    }
 
     public function chat(Request $request)
     {
@@ -31,7 +34,7 @@ class ChatController extends Controller
         $system = $instruction ?: (env('DEFAULT_SYSTEM', 'Siz yordamchisiz.') . ' Javob tili: ' . env('DEFAULT_LANG', 'uz') . '.');
 
         $finalPrompt = $user;
-        if (in_array($useRag, ['true','1','yes','auto'])) {
+        if (in_array($useRag, ['true', '1', 'yes', 'auto'])) {
             $ctxs = $this->rag->search($user, $project, $k);
             $ctxText = implode("\n\n", array_map(fn($c) => $c['content'], $ctxs));
 
@@ -48,7 +51,8 @@ Qoidalar:
 - Javobingizni kontekstdan oling.
 - Siz chat assistantsiz. Faqat odamlarning savollariga javob bering.
 - Sen kimsan deb savol berilsa "O'zing kimsan?" deb javob bering.
-- Agar kontekstdan topilmasa o'zingiz taxmin qiling.
+- Agar kontekstdan topilmasa bunday ma'lumotga ega emasligingizni ayting.
+- Formal javob bering.
 PROMPT;
         }
 

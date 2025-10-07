@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'qdrant' => [
+        'host' => env('QDRANT_HOST', 'http://qdrant:6333'),
+        'collection' => env('QDRANT_COLLECTION', 'documents'),
+    ],
+
+
+
 ];

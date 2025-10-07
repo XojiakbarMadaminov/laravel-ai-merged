@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\QdrantRagService;
 use Illuminate\Http\Request;
-use App\Services\RagService;
 
 class DebugController extends Controller
 {
-    public function __construct(private RagService $rag) {}
+    public function __construct(private QdrantRagService $rag)
+    {
+    }
 
     public function search(Request $request)
     {
